@@ -79,6 +79,15 @@ prisma/
 └── seed.ts              # Quests, items, shadows, achievements
 ```
 
+For Vercel deployment, define the following environment variables in Project Settings:
+
+- `DATABASE_URL`
+- `REDIS_URL`
+- `JWT_ACCESS_SECRET`
+- `JWT_REFRESH_SECRET`
+- `CSRF_SECRET`
+- `NEXT_PUBLIC_APP_URL`
+
 ## Security
 
 - OWASP-aligned headers (CSP, HSTS, X-Frame-Options)
