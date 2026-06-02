@@ -1,0 +1,125 @@
+@import "tailwindcss";
+
+:root {
+  --bg-deep: #030712;
+  --bg-mid: #0a1628;
+  --glass-bg: rgba(15, 23, 42, 0.45);
+  --glass-border: rgba(56, 189, 248, 0.15);
+  --hologram-blue: #38bdf8;
+  --hologram-cyan: #22d3ee;
+  --hologram-glow: rgba(56, 189, 248, 0.4);
+  --text-primary: #f1f5f9;
+  --text-muted: #94a3b8;
+  --accent: #0ea5e9;
+  --danger: #f43f5e;
+  --success: #10b981;
+}
+
+@theme inline {
+  --color-background: var(--bg-deep);
+  --color-foreground: var(--text-primary);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont,
+    "SF Pro Display", "Segoe UI", sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Ambient background mesh */
+.system-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(14, 165, 233, 0.25), transparent),
+    radial-gradient(ellipse 60% 40% at 100% 50%, rgba(34, 211, 238, 0.08), transparent),
+    radial-gradient(ellipse 50% 30% at 0% 80%, rgba(99, 102, 241, 0.1), transparent),
+    linear-gradient(180deg, #030712 0%, #0a1628 50%, #030712 100%);
+}
+
+/* Glass morphism utility */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.glass-strong {
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(32px) saturate(200%);
+  -webkit-backdrop-filter: blur(32px) saturate(200%);
+}
+
+.hologram-border {
+  position: relative;
+}
+
+.hologram-border::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    135deg,
+    rgba(56, 189, 248, 0.6),
+    transparent 40%,
+    transparent 60%,
+    rgba(34, 211, 238, 0.4)
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.glow-blue {
+  box-shadow: 0 0 40px var(--hologram-glow), 0 0 80px rgba(14, 165, 233, 0.15);
+}
+
+.text-hologram {
+  background: linear-gradient(135deg, #7dd3fc, #38bdf8, #22d3ee);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(56, 189, 248, 0.3);
+  border-radius: 4px;
+}
+
+/* Rarity colors */
+.rarity-common { color: #9ca3af; }
+.rarity-uncommon { color: #22c55e; }
+.rarity-rare { color: #3b82f6; }
+.rarity-epic { color: #a855f7; }
+.rarity-legendary { color: #f59e0b; }
+.rarity-monarch { color: #22d3ee; text-shadow: 0 0 12px rgba(34, 211, 238, 0.6); }

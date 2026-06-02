@@ -1,0 +1,405 @@
+// Monarch System — database schema
+// PostgreSQL + Prisma ORM
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum Rank {
+  E
+  D
+  C
+  B
+  A
+  S
+  NATIONAL
+  MONARCH
+}
+
+enum ItemRarity {
+  COMMON
+  UNCOMMON
+  RARE
+  EPIC
+  LEGENDARY
+  MONARCH
+}
+
+enum ItemType {
+  WEAPON
+  ARMOR
+  POTION
+  ACCESSORY
+}
+
+enum EquipmentSlot {
+  WEAPON
+  HEAD
+  CHEST
+  LEGS
+  ACCESSORY
+}
+
+enum QuestStatus {
+  ACTIVE
+  COMPLETED
+  EXPIRED
+}
+
+enum DungeonStatus {
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+  COOLDOWN
+}
+
+enum ShadowGrade {
+  NORMAL
+  ELITE
+  KNIGHT
+  MARSHAL
+  GENERAL
+  MONARCH
+}
+
+enum GuildRole {
+  LEADER
+  OFFICER
+  MEMBER
+}
+
+// ─── Auth & Users ────────────────────────────────────────────────────────────
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String
+  displayName   String
+  emailVerified Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  player              Player?
+  sessions            Session[]
+  emailTokens         EmailVerificationToken[]
+  passwordResetTokens PasswordResetToken[]
+  auditLogs           AuditLog[]
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  userId       String
+  refreshToken String   @unique
+  userAgent    String?
+  ipAddress    String?
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model EmailVerificationToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  action    String
+  resource  String?
+  metadata  Json?
+  ipAddress String?
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+// ─── Player / Hunter System ──────────────────────────────────────────────────
+
+model Player {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  hunterName      String   @unique
+  level           Int      @default(1)
+  xp              Int      @default(0)
+  xpToNextLevel   Int      @default(100)
+  rank            Rank     @default(E)
+  gold            Int      @default(100)
+  statPoints      Int      @default(5)
+  strength        Int      @default(10)
+  agility         Int      @default(10)
+  intelligence    Int      @default(10)
+  vitality        Int      @default(10)
+  perception      Int      @default(10)
+  questStreak     Int      @default(0)
+  lastQuestDate   DateTime?
+  dungeonCooldown DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user            User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quests          PlayerQuest[]
+  achievements    PlayerAchievement[]
+  inventory       InventoryItem[]
+  equipment       PlayerEquipment[]
+  dungeonRuns     DungeonRun[]
+  shadows         PlayerShadow[]
+  guildMember     GuildMember?
+  leaderboardXp   LeaderboardSnapshot[]
+
+  @@index([level])
+  @@index([xp])
+  @@index([rank])
+}
+
+// ─── Daily Quests ────────────────────────────────────────────────────────────
+
+model QuestTemplate {
+  id          String  @id @default(cuid())
+  title       String
+  description String
+  minLevel    Int     @default(1)
+  xpReward    Int
+  goldReward  Int
+  weight      Int     @default(1)
+  active      Boolean @default(true)
+
+  playerQuests PlayerQuest[]
+}
+
+model PlayerQuest {
+  id         String      @id @default(cuid())
+  playerId   String
+  templateId String
+  status     QuestStatus @default(ACTIVE)
+  progress   Int         @default(0)
+  target     Int         @default(1)
+  assignedAt DateTime    @default(now())
+  completedAt DateTime?
+
+  player   Player        @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  template QuestTemplate @relation(fields: [templateId], references: [id])
+
+  @@index([playerId, status])
+  @@index([playerId, assignedAt])
+}
+
+// ─── Achievements ────────────────────────────────────────────────────────────
+
+model Achievement {
+  id          String  @id @default(cuid())
+  slug        String  @unique
+  title       String
+  description String
+  hidden      Boolean @default(false)
+  icon        String
+  xpReward    Int     @default(0)
+  goldReward  Int     @default(0)
+  target      Int     @default(1)
+  category    String
+
+  playerAchievements PlayerAchievement[]
+}
+
+model PlayerAchievement {
+  id            String    @id @default(cuid())
+  playerId      String
+  achievementId String
+  progress      Int       @default(0)
+  unlocked      Boolean   @default(false)
+  claimed       Boolean   @default(false)
+  unlockedAt    DateTime?
+
+  player      Player      @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  achievement Achievement @relation(fields: [achievementId], references: [id])
+
+  @@unique([playerId, achievementId])
+}
+
+// ─── Inventory & Items ───────────────────────────────────────────────────────
+
+model ItemCatalog {
+  id          String     @id @default(cuid())
+  slug        String     @unique
+  name        String
+  description String
+  type        ItemType
+  rarity      ItemRarity
+  slot        EquipmentSlot?
+  attack      Int        @default(0)
+  defense     Int        @default(0)
+  healAmount  Int        @default(0)
+  minLevel    Int        @default(1)
+  icon        String
+
+  inventoryItems InventoryItem[]
+  equipment      PlayerEquipment[]
+}
+
+model InventoryItem {
+  id        String   @id @default(cuid())
+  playerId  String
+  itemId    String
+  quantity  Int      @default(1)
+  equipped  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  player Player      @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  item   ItemCatalog @relation(fields: [itemId], references: [id])
+
+  @@index([playerId])
+}
+
+model PlayerEquipment {
+  id       String        @id @default(cuid())
+  playerId String
+  slot     EquipmentSlot
+  itemId   String
+
+  player Player      @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  item   ItemCatalog @relation(fields: [itemId], references: [id])
+
+  @@unique([playerId, slot])
+}
+
+// ─── Dungeons ────────────────────────────────────────────────────────────────
+
+model DungeonRun {
+  id           String        @id @default(cuid())
+  playerId     String
+  seed         String
+  difficulty   Int
+  floors       Int
+  currentFloor Int           @default(1)
+  status       DungeonStatus @default(IN_PROGRESS)
+  bossName     String?
+  xpEarned     Int           @default(0)
+  goldEarned   Int           @default(0)
+  startedAt    DateTime      @default(now())
+  completedAt  DateTime?
+
+  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@index([playerId, status])
+}
+
+// ─── Shadow Army ─────────────────────────────────────────────────────────────
+
+model ShadowTemplate {
+  id          String      @id @default(cuid())
+  slug        String      @unique
+  name        String
+  title       String
+  grade       ShadowGrade
+  basePower   Int
+  icon        String
+  description String
+
+  playerShadows PlayerShadow[]
+}
+
+model PlayerShadow {
+  id         String   @id @default(cuid())
+  playerId   String
+  templateId String
+  level      Int      @default(1)
+  power      Int
+  summonedAt DateTime @default(now())
+
+  player   Player         @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  template ShadowTemplate @relation(fields: [templateId], references: [id])
+
+  @@index([playerId])
+}
+
+// ─── Guilds ──────────────────────────────────────────────────────────────────
+
+model Guild {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  tag         String   @unique @db.VarChar(5)
+  description String?
+  emblem      String?
+  level       Int      @default(1)
+  xp          Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  members  GuildMember[]
+  messages GuildMessage[]
+}
+
+model GuildMember {
+  id       String    @id @default(cuid())
+  guildId  String
+  playerId String    @unique
+  role     GuildRole @default(MEMBER)
+  joinedAt DateTime  @default(now())
+
+  guild  Guild  @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@index([guildId])
+}
+
+model GuildMessage {
+  id        String   @id @default(cuid())
+  guildId   String
+  playerId  String
+  content   String
+  createdAt DateTime @default(now())
+
+  guild Guild @relation(fields: [guildId], references: [id], onDelete: Cascade)
+
+  @@index([guildId, createdAt])
+}
+
+// ─── Leaderboards (cached snapshots) ─────────────────────────────────────────
+
+model LeaderboardSnapshot {
+  id        String   @id @default(cuid())
+  playerId  String
+  category  String
+  score     Int
+  rank      Int
+  updatedAt DateTime @default(now())
+
+  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@unique([playerId, category])
+  @@index([category, score])
+}
