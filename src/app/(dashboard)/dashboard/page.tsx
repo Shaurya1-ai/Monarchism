@@ -22,11 +22,18 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-        <h1 className="text-3xl font-semibold tracking-tight text-slate-100">
-          Hunter Status
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="rounded-3xl border border-sky-400/20 bg-gradient-to-r from-sky-900/30 via-cyan-900/15 to-transparent p-6"
+      >
+        <p className="text-xs uppercase tracking-[0.2em] text-cyan-300/80">Hunter Interface</p>
+        <h1 className="mt-2 text-4xl font-semibold tracking-tight text-slate-100">
+          Monarch Control Center
         </h1>
-        <p className="text-slate-400">System interface — all channels operational</p>
+        <p className="mt-2 text-slate-300">
+          Real-time status, rank progression, and combat readiness telemetry.
+        </p>
       </motion.div>
 
       <GlassPanel hologram glow delay={0.1}>
@@ -62,20 +69,22 @@ export default function DashboardPage() {
       </GlassPanel>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-        {stats.map((s, i) => (
+        {stats.map((s) => (
           <StatCard key={s.key} name={s.key} value={s.value} />
         ))}
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <GlassPanel delay={0.2}>
+        <GlassPanel delay={0.2} className="relative overflow-hidden">
+          <div className="absolute right-[-40px] top-[-40px] h-28 w-28 rounded-full bg-cyan-400/20 blur-3xl" />
           <h3 className="text-hologram font-medium">System Notice</h3>
           <p className="mt-2 text-sm text-slate-400">
             Complete daily quests to maintain your streak. Dungeons grant significant XP but
             impose a 30-minute cooldown after completion. Shadow extraction unlocks at level 5.
           </p>
         </GlassPanel>
-        <GlassPanel delay={0.3}>
+        <GlassPanel delay={0.3} className="relative overflow-hidden">
+          <div className="absolute left-[-40px] top-[-40px] h-28 w-28 rounded-full bg-sky-500/20 blur-3xl" />
           <h3 className="text-hologram font-medium">Quick Actions</h3>
           <ul className="mt-3 space-y-2 text-sm text-slate-400">
             <li>→ Daily Quests — earn XP and gold</li>

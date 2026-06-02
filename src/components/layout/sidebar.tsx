@@ -39,7 +39,7 @@ export function Sidebar() {
     <motion.aside
       initial={{ x: -20, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
-      className="glass-strong fixed left-4 top-4 z-40 flex h-[calc(100vh-2rem)] w-64 flex-col rounded-2xl p-4 shadow-2xl"
+      className="glass-strong fixed left-4 top-4 z-40 hidden h-[calc(100vh-2rem)] w-72 flex-col rounded-3xl p-4 shadow-2xl md:flex"
     >
       <div className="mb-6 flex items-center justify-between px-2">
         <TrafficLights />
@@ -48,20 +48,20 @@ export function Sidebar() {
         </span>
       </div>
 
-      <div className="mb-6 px-2">
+      <div className="mb-4 rounded-2xl border border-sky-500/10 bg-slate-950/40 p-3">
         <h1 className="text-hologram text-lg font-semibold tracking-tight">
           MONARCH SYSTEM
         </h1>
         {player && (
-          <p className="mt-1 truncate text-xs text-slate-400">
-            {player.hunterName}{" "}
+          <div className="mt-2 flex items-center justify-between">
+            <p className="truncate text-xs text-slate-300">{player.hunterName}</p>
             <span
               style={{ color: RANK_COLORS[player.rank] }}
-              className="font-medium"
+              className="rounded-full border border-current/30 px-2 py-0.5 text-[10px] font-semibold"
             >
-              [{player.rank}]
+              {player.rank}
             </span>
-          </p>
+          </div>
         )}
       </div>
 
@@ -71,11 +71,11 @@ export function Sidebar() {
           return (
             <Link key={href} href={href}>
               <motion.span
-                whileHover={{ x: 4 }}
+                whileHover={{ x: 4, scale: 1.01 }}
                 className={cn(
                   "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition",
                   active
-                    ? "bg-sky-500/20 text-sky-300 shadow-inner shadow-sky-500/10"
+                    ? "bg-gradient-to-r from-sky-500/30 to-cyan-500/10 text-sky-200 shadow-[0_0_30px_rgba(56,189,248,0.18)]"
                     : "text-slate-400 hover:bg-white/5 hover:text-slate-200"
                 )}
               >
@@ -87,7 +87,7 @@ export function Sidebar() {
         })}
       </nav>
 
-      <div className="mt-4 border-t border-sky-500/10 pt-4 text-center text-[10px] text-slate-500">
+      <div className="mt-4 border-t border-sky-500/10 pt-4 text-center text-[10px] uppercase tracking-[0.18em] text-slate-500">
         SYSTEM ONLINE v1.0
       </div>
     </motion.aside>

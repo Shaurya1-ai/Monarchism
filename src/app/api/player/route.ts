@@ -3,7 +3,6 @@ import { requirePlayer } from "@/lib/auth/get-user";
 import { validateCsrf } from "@/lib/security/csrf";
 import { allocateStatsSchema } from "@/lib/validators/auth";
 import { jsonOk, jsonError, handleApiError } from "@/lib/api/response";
-import { applyXp, statPointsForLevelUp } from "@/lib/game/level";
 
 export async function GET() {
   try {

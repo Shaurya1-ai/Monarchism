@@ -36,17 +36,18 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center px-4">
-      <GlassPanel hologram className="w-full max-w-md">
+      <GlassPanel hologram glow className="w-full max-w-md border-sky-400/30">
         <div className="mb-6">
           <TrafficLights />
         </div>
-        <h1 className="text-hologram text-2xl font-semibold">System Login</h1>
-        <p className="mt-1 text-sm text-slate-400">Authenticate to access your hunter profile</p>
+        <p className="text-xs uppercase tracking-[0.2em] text-cyan-300/70">Authentication Required</p>
+        <h1 className="text-hologram mt-2 text-3xl font-semibold">System Login</h1>
+        <p className="mt-1 text-sm text-slate-300">Authenticate to access your hunter profile</p>
         <form onSubmit={handleSubmit} className="mt-8 space-y-4">
           <Input label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
           <Input label="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
           {error && <p className="text-sm text-rose-400">{error}</p>}
-          <Button type="submit" loading={loading} className="w-full">
+          <Button type="submit" loading={loading} className="w-full py-3 text-base">
             Access System
           </Button>
         </form>
