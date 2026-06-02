@@ -1,0 +1,58 @@
+{
+  "name": "monarch-system",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "prisma generate && next build --turbopack",
+    "start": "next start",
+    "lint": "eslint",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:push": "prisma db push",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:studio": "prisma studio",
+    "docker:up": "docker compose up -d",
+    "postinstall": "prisma generate"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.19.0",
+    "@tanstack/react-query": "^5.100.14",
+    "@tsparticles/react": "^4.1.2",
+    "@tsparticles/slim": "^4.1.2",
+    "argon2": "^0.44.0",
+    "clsx": "^2.1.1",
+    "cookie": "^1.1.1",
+    "dotenv": "^17.4.2",
+    "framer-motion": "^12.40.0",
+    "ioredis": "^5.11.0",
+    "isomorphic-dompurify": "^3.15.0",
+    "jose": "^6.2.3",
+    "lucide-react": "^1.17.0",
+    "nanoid": "^5.1.11",
+    "next": "15.5.19",
+    "rate-limiter-flexible": "^11.1.0",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "tailwind-merge": "^3.6.0",
+    "zod": "^4.4.3",
+    "zustand": "^5.0.14"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
+    "@types/cookie": "^0.6.0",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "15.5.19",
+    "prisma": "^6.19.0",
+    "tailwindcss": "^4",
+    "tsx": "^4.22.4",
+    "typescript": "^5"
+  }
+}
