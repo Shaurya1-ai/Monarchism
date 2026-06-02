@@ -17,7 +17,16 @@ import {
 import { cn } from "@/lib/utils/cn";
 import { TrafficLights } from "@/components/layout/traffic-lights";
 import { usePlayerStore } from "@/stores/player-store";
-import { RANK_COLORS } from "@/lib/game/level";
+const RANK_COLORS: Record<string, string> = {
+  E: "#9ca3af",
+  D: "#22c55e",
+  C: "#3b82f6",
+  B: "#a855f7",
+  A: "#f59e0b",
+  S: "#ef4444",
+  NATIONAL: "#ec4899",
+  MONARCH: "#06b6d4",
+};
 
 const NAV = [
   { href: "/dashboard", label: "System", icon: LayoutDashboard },

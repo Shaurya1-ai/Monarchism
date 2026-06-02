@@ -1,54 +1,53 @@
 "use client";
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { GlassPanel } from "@/components/ui/glass-panel";
 import { Button } from "@/components/ui/button";
-import { useApi } from "@/hooks/use-api";
 import { cn } from "@/lib/utils/cn";
 
 const RARITY_CLASS: Record<string, string> = {
-  COMMON: "rarity-common",
-  UNCOMMON: "rarity-uncommon",
-  RARE: "rarity-rare",
-  EPIC: "rarity-epic",
-  LEGENDARY: "rarity-legendary",
-  MONARCH: "rarity-monarch",
+  COMMON: "text-slate-400",
+  UNCOMMON: "text-green-400",
+  RARE: "text-blue-400",
+  EPIC: "text-purple-400",
+  LEGENDARY: "text-amber-400",
+  MONARCH: "text-cyan-400",
 };
 
 type InvItem = {
   id: string;
-  item: {
-    name: string;
-    description: string;
-    rarity: string;
-    type: string;
-    slot: string | null;
-    attack: number;
-    defense: number;
-  };
+  name: string;
+  description: string;
+  rarity: string;
+  type: string;
+  slot: string | null;
+  attack: number;
+  defense: number;
 };
 
+const STARTER_ITEMS: InvItem[] = [
+  { id: "i1", name: "Training Sword", description: "A basic sword for beginners", rarity: "COMMON", type: "WEAPON", slot: "WEAPON", attack: 5, defense: 0 },
+  { id: "i2", name: "Leather Helmet", description: "Basic head protection", rarity: "COMMON", type: "ARMOR", slot: "HEAD", attack: 0, defense: 3 },
+  { id: "i3", name: "Cloth Tunic", description: "Simple chest armor", rarity: "COMMON", type: "ARMOR", slot: "CHEST", attack: 0, defense: 5 },
+  { id: "i4", name: "Health Potion", description: "Restores 50 HP", rarity: "UNCOMMON", type: "CONSUMABLE", slot: null, attack: 0, defense: 0 },
+  { id: "i5", name: "Mana Crystal", description: "Restores 30 MP", rarity: "UNCOMMON", type: "CONSUMABLE", slot: null, attack: 0, defense: 0 },
+  { id: "i6", name: "Iron Dagger", description: "Quick and deadly", rarity: "RARE", type: "WEAPON", slot: "WEAPON", attack: 12, defense: 0 },
+];
+
 export default function InventoryPage() {
-  const { request } = useApi();
-  const qc = useQueryClient();
-
-  const { data } = useQuery({
-    queryKey: ["inventory"],
-    queryFn: () =>
-      request<{ inventory: InvItem[]; equipment: Array<{ slot: string; item: InvItem["item"] }> }>("/api/inventory").then((r) => r.data!),
+  const [inventory] = useState<InvItem[]>(STARTER_ITEMS);
+  const [equipment, setEquipment] = useState<Record<string, InvItem | null>>({
+    WEAPON: null,
+    HEAD: null,
+    CHEST: null,
+    LEGS: null,
+    ACCESSORY: null,
   });
 
-  const equip = useMutation({
-    mutationFn: ({ id, slot }: { id: string; slot: string }) =>
-      request("/api/inventory", {
-        method: "POST",
-        body: JSON.stringify({ inventoryItemId: id, slot }),
-      }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["inventory"] }),
-  });
-
-  const inventory = data?.inventory ?? [];
-  const equipment = data?.equipment ?? [];
+  function equipItem(item: InvItem) {
+    if (!item.slot) return;
+    setEquipment((prev) => ({ ...prev, [item.slot!]: item }));
+  }
 
   return (
     <div className="space-y-6">
@@ -58,16 +57,16 @@ export default function InventoryPage() {
         <h2 className="text-sm uppercase tracking-wider text-slate-400">Equipped</h2>
         <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-5">
           {["WEAPON", "HEAD", "CHEST", "LEGS", "ACCESSORY"].map((slot) => {
-            const eq = equipment.find((e) => e.slot === slot);
+            const eq = equipment[slot];
             return (
               <div
                 key={slot}
                 className="glass flex min-h-[80px] flex-col items-center justify-center rounded-xl p-3 text-center"
-                title={eq?.item.name}
+                title={eq?.name}
               >
                 <span className="text-[10px] text-slate-500">{slot}</span>
-                <span className="mt-1 text-xs text-sky-300">
-                  {eq?.item.name ?? "—"}
+                <span className={cn("mt-1 text-xs", eq ? RARITY_CLASS[eq.rarity] : "text-slate-600")}>
+                  {eq?.name ?? "—"}
                 </span>
               </div>
             );
@@ -76,33 +75,30 @@ export default function InventoryPage() {
       </GlassPanel>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6">
-        {inventory.map((inv, i) => (
+        {inventory.map((item, i) => (
           <GlassPanel
-            key={inv.id}
+            key={item.id}
             delay={i * 0.02}
             className="group relative cursor-default p-4"
           >
-            <p className={cn("text-sm font-medium", RARITY_CLASS[inv.item.rarity])}>
-              {inv.item.name}
+            <p className={cn("text-sm font-medium", RARITY_CLASS[item.rarity])}>
+              {item.name}
             </p>
             <p className="mt-1 line-clamp-2 text-[10px] text-slate-500">
-              {inv.item.description}
+              {item.description}
             </p>
-            {inv.item.slot && (
+            <p className="mt-2 text-[10px] text-slate-600">
+              ATK {item.attack} / DEF {item.defense}
+            </p>
+            {item.slot && (
               <Button
                 variant="ghost"
                 className="mt-2 w-full text-xs"
-                onClick={() =>
-                  equip.mutate({ id: inv.id, slot: inv.item.slot! })
-                }
+                onClick={() => equipItem(item)}
               >
                 Equip
               </Button>
             )}
-            {/* Tooltip on hover */}
-            <div className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 hidden w-48 -translate-x-1/2 rounded-lg glass-strong p-3 text-xs group-hover:block">
-              ATK {inv.item.attack} / DEF {inv.item.defense}
-            </div>
           </GlassPanel>
         ))}
       </div>

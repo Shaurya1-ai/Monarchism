@@ -5,12 +5,30 @@ import { GlassPanel } from "@/components/ui/glass-panel";
 import { XpBar } from "@/components/game/xp-bar";
 import { StatCard } from "@/components/game/stat-card";
 import { usePlayerStore } from "@/stores/player-store";
-import { RANK_COLORS } from "@/lib/game/level";
-import { Coins, Flame, Shield } from "lucide-react";
+import { Coins, Shield } from "lucide-react";
+
+const RANK_COLORS: Record<string, string> = {
+  E: "#9ca3af",
+  D: "#22c55e",
+  C: "#3b82f6",
+  B: "#a855f7",
+  A: "#f59e0b",
+  S: "#ef4444",
+  NATIONAL: "#ec4899",
+  MONARCH: "#06b6d4",
+};
+
+const XP_TABLE = [0, 100, 250, 500, 850, 1300, 1900, 2600, 3500, 4600, 6000];
+
+function getXpToNextLevel(level: number): number {
+  return XP_TABLE[Math.min(level, XP_TABLE.length - 1)] || 6000 + (level - 10) * 1500;
+}
 
 export default function DashboardPage() {
   const player = usePlayerStore((s) => s.player);
   if (!player) return null;
+
+  const xpToNext = getXpToNextLevel(player.level);
 
   const stats = [
     { key: "strength", value: player.strength },
@@ -53,10 +71,6 @@ export default function DashboardPage() {
               <Coins className="h-5 w-5" />
               <span className="text-xl font-semibold tabular-nums">{player.gold}</span>
             </div>
-            <div className="flex items-center gap-2 text-orange-400">
-              <Flame className="h-5 w-5" />
-              <span className="text-xl font-semibold">{player.questStreak} day streak</span>
-            </div>
             <div className="flex items-center gap-2 text-sky-400">
               <Shield className="h-5 w-5" />
               <span className="text-xl font-semibold">{player.statPoints} pts</span>
@@ -64,7 +78,7 @@ export default function DashboardPage() {
           </div>
         </div>
         <div className="mt-8">
-          <XpBar xp={player.xp} xpToNext={player.xpToNextLevel} level={player.level} />
+          <XpBar xp={player.xp} xpToNext={xpToNext} level={player.level} />
         </div>
       </GlassPanel>
 
